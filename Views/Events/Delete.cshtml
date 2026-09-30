@@ -1,0 +1,31 @@
+@model EventTicketApp.Models.Event
+
+@{
+    ViewData["Title"] = "Etkinlik Sil";
+}
+
+<div class="container mt-4">
+    <h2 class="text-danger">Etkinliği Sil</h2>
+    <h4>Bu etkinliği silmek istediğinizden emin misiniz?</h4>
+    <hr />
+
+    <dl class="row">
+        <dt class="col-sm-3">Etkinlik Adı</dt>
+        <dd class="col-sm-9">@Model.Title</dd>
+
+        <dt class="col-sm-3">Kategori</dt>
+        <dd class="col-sm-9">@Model.Category?.Name</dd>
+
+        <dt class="col-sm-3">Tarih</dt>
+        <dd class="col-sm-9">@Model.EventDate.ToString("dd.MM.yyyy HH:mm")</dd>
+
+        <dt class="col-sm-3">Fiyat</dt>
+        <dd class="col-sm-9">@Model.Price.ToString("C")</dd>
+    </dl>
+
+    <form asp-action="Delete" method="post">
+        <input type="hidden" asp-for="Id" />
+        <button type="submit" class="btn btn-danger">Evet, Sil</button>
+        <a asp-action="Index" class="btn btn-secondary">İptal</a>
+    </form>
+</div>

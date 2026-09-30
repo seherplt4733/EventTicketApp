@@ -1,0 +1,44 @@
+@model EventTicketApp.Models.Event
+
+@{
+    ViewData["Title"] = "Etkinlik Detayı";
+}
+
+<div class="container mt-4">
+    <h2>Etkinlik Detayı</h2>
+    <hr />
+
+    @if (!string.IsNullOrEmpty(Model.ImagePath))
+    {
+        <div class="text-center mb-4">
+            <img src="@Model.ImagePath" alt="@Model.Title"
+                 class="img-fluid rounded shadow"
+                 style="max-height: 400px; object-fit: cover;" />
+        </div>
+    }
+
+    <dl class="row">
+        <dt class="col-sm-3">Etkinlik Adı</dt>
+        <dd class="col-sm-9">@Model.Title</dd>
+
+        <dt class="col-sm-3">Açıklama</dt>
+        <dd class="col-sm-9">@Model.Description</dd>
+
+        <dt class="col-sm-3">Kategori</dt>
+        <dd class="col-sm-9">
+            <span class="badge bg-info text-dark">@Model.Category?.Name</span>
+        </dd>
+
+        <dt class="col-sm-3">Tarih</dt>
+        <dd class="col-sm-9">@Model.EventDate.ToString("dd.MM.yyyy HH:mm")</dd>
+
+        <dt class="col-sm-3">Konum</dt>
+        <dd class="col-sm-9">@Model.Location</dd>
+
+        <dt class="col-sm-3">Fiyat</dt>
+        <dd class="col-sm-9 text-success fw-bold">@Model.Price.ToString("C")</dd>
+    </dl>
+
+    <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-warning">Düzenle</a>
+    <a asp-action="Index" class="btn btn-secondary">Geri Dön</a>
+</div>

@@ -1,0 +1,67 @@
+@model EventTicketApp.Models.Event
+
+@{
+    ViewData["Title"] = "Yeni Etkinlik Ekle";
+}
+
+<div class="container mt-4">
+    <h2>Yeni Etkinlik Ekle</h2>
+    <hr />
+    <div class="row">
+        <div class="col-md-8">
+            <form asp-action="Create" method="post" enctype="multipart/form-data">
+
+                <div class="mb-3">
+                    <label asp-for="Title" class="form-label">Etkinlik Adı</label>
+                    <input asp-for="Title" class="form-control" />
+                    <span asp-validation-for="Title" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Description" class="form-label">Açıklama</label>
+                    <textarea asp-for="Description" class="form-control" rows="3"></textarea>
+                    <span asp-validation-for="Description" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="CategoryId" class="form-label">Kategori</label>
+                    <select asp-for="CategoryId" class="form-select"
+                            asp-items="@(ViewBag.Categories as SelectList)">
+                        <option value="">-- Kategori Seçin --</option>
+                    </select>
+                    <span asp-validation-for="CategoryId" class="text-danger"></span>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="EventDate" class="form-label">Etkinlik Tarihi</label>
+                        <input asp-for="EventDate" type="datetime-local" class="form-control" />
+                        <span asp-validation-for="EventDate" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="Price" class="form-label">Bilet Fiyatı</label>
+                        <input asp-for="Price" class="form-control" />
+                        <span asp-validation-for="Price" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Location" class="form-label">Konum</label>
+                    <input asp-for="Location" class="form-control" />
+                    <span asp-validation-for="Location" class="text-danger"></span>
+                </div>
+
+                <!-- ⬇️ YENİ EKLENEN KISIM ⬇️ -->
+                <div class="mb-3">
+                    <label for="imageFile" class="form-label">Afiş / Resim</label>
+                    <input type="file" name="imageFile" id="imageFile" class="form-control" accept="image/*" />
+                    <small class="text-muted">JPG, PNG, WEBP desteklenir</small>
+                </div>
+
+                <button type="submit" class="btn btn-success">Kaydet</button>
+                <a asp-action="Index" class="btn btn-secondary">İptal</a>
+            </form>
+        </div>
+    </div>
+</div>

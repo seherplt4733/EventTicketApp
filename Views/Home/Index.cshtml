@@ -1,0 +1,114 @@
+﻿@model IEnumerable<EventTicketApp.Models.Event>
+
+@{
+    ViewData["Title"] = "Ana Sayfa";
+    var avgPrice = (decimal)ViewBag.AveragePrice;
+}
+
+<!-- Hero Bölümü -->
+<div class="bg-primary text-white text-center py-5 mb-4 rounded shadow-sm">
+    <h1 class="display-4 fw-bold">🎫 EventTicketApp</h1>
+    <p class="lead">Türkiye'nin en kapsamlı etkinlik biletleme platformu</p>
+    <a asp-controller="Events" asp-action="Index" class="btn btn-light btn-lg mt-2">
+        Etkinlikleri Keşfet →
+    </a>
+</div>
+
+<!-- İstatistik Kartları -->
+<div class="row g-4 mb-5">
+    <div class="col-md-3 col-sm-6">
+        <div class="card border-0 shadow-sm h-100 text-center">
+            <div class="card-body">
+                <div style="font-size: 3rem;">📅</div>
+                <h2 class="display-6 fw-bold text-primary mb-0">@ViewBag.TotalEvents</h2>
+                <p class="text-muted mb-0">Toplam Etkinlik</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3 col-sm-6">
+        <div class="card border-0 shadow-sm h-100 text-center">
+            <div class="card-body">
+                <div style="font-size: 3rem;">📂</div>
+                <h2 class="display-6 fw-bold text-success mb-0">@ViewBag.TotalCategories</h2>
+                <p class="text-muted mb-0">Kategori</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3 col-sm-6">
+        <div class="card border-0 shadow-sm h-100 text-center">
+            <div class="card-body">
+                <div style="font-size: 3rem;">⏰</div>
+                <h2 class="display-6 fw-bold text-warning mb-0">@ViewBag.UpcomingEvents</h2>
+                <p class="text-muted mb-0">Yaklaşan Etkinlik</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3 col-sm-6">
+        <div class="card border-0 shadow-sm h-100 text-center">
+            <div class="card-body">
+                <div style="font-size: 3rem;">💰</div>
+                <h2 class="display-6 fw-bold text-danger mb-0">@avgPrice.ToString("C")</h2>
+                <p class="text-muted mb-0">Ortalama Fiyat</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Son Eklenen Etkinlikler -->
+<div class="card border-0 shadow-sm">
+    <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">🆕 Son Eklenen Etkinlikler</h5>
+        <a asp-controller="Events" asp-action="Index" class="btn btn-sm btn-outline-light">
+            Tümünü Gör
+        </a>
+    </div>
+    <div class="card-body p-0">
+        @if (!Model.Any())
+        {
+            <div class="text-center text-muted py-5">
+                <p>Henüz etkinlik eklenmedi.</p>
+                <a asp-controller="Events" asp-action="Create" class="btn btn-primary">
+                    İlk Etkinliği Ekle
+                </a>
+            </div>
+        }
+        else
+        {
+            <table class="table table-hover mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Başlık</th>
+                        <th>Kategori</th>
+                        <th>Tarih</th>
+                        <th>Konum</th>
+                        <th class="text-end">Fiyat</th>
+                        <th class="text-center">İşlem</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            <td class="fw-semibold">@item.Title</td>
+                            <td>
+                                <span class="badge bg-info text-dark">@item.Category?.Name</span>
+                            </td>
+                            <td>@item.EventDate.ToString("dd.MM.yyyy HH:mm")</td>
+                            <td>@item.Location</td>
+                            <td class="text-end text-success fw-bold">@item.Price.ToString("C")</td>
+                            <td class="text-center">
+                                <a asp-controller="Events" asp-action="Details" asp-route-id="@item.Id"
+                                   class="btn btn-sm btn-outline-primary">
+                                    Detay
+                                </a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+    </div>
+</div>
