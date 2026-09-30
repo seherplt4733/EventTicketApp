@@ -2,43 +2,183 @@
 
 @{
     ViewData["Title"] = "Etkinlik Detayı";
+    // Google Calendar Etkinlik Oluşturma Bağlantısı
+    var startDate = Model.EventDate.ToString("yyyyMMddTHHmmssZ");
+    var endDate = Model.EventDate.AddHours(2).ToString("yyyyMMddTHHmmssZ");
+    var googleCalendarUrl = $"https://calendar.google.com/calendar/render?action=TEMPLATE&text={Uri.EscapeDataString(Model.Title)}&dates={startDate}/{endDate}&details={Uri.EscapeDataString(Model.Description)}&location={Uri.EscapeDataString(Model.Location)}";
 }
 
-<div class="container mt-4">
-    <h2>Etkinlik Detayı</h2>
-    <hr />
+<div class="container my-4">
+    <div class="row g-4">
+        <!-- Sol Kolon: Afiş ve Harita -->
+        <div class="col-lg-5">
+            @if (!string.IsNullOrEmpty(Model.ImagePath))
+            {
+                <img src="@Model.ImagePath" alt="@Model.Title"
+                     class="img-fluid rounded shadow border border-secondary mb-3 w-100"
+                     style="max-height: 380px; object-fit: cover;" />
+            }
+            else
+            {
+                <div class="bg-secondary bg-opacity-25 rounded d-flex align-items-center justify-content-center mb-3" style="height: 250px;">
+                    <span class="text-muted">Afiş Yüklenmemiş</span>
+                </div>
+            }
 
-    @if (!string.IsNullOrEmpty(Model.ImagePath))
-    {
-        <div class="text-center mb-4">
-            <img src="@Model.ImagePath" alt="@Model.Title"
-                 class="img-fluid rounded shadow"
-                 style="max-height: 400px; object-fit: cover;" />
+            <!-- Canlı Harita Kartı (Google Maps / Embed) -->
+            <div class="card bg-dark text-white border-secondary shadow-sm">
+                <div class="card-header border-secondary d-flex justify-content-between align-items-center">
+                    <small class="fw-bold"><i class="bi bi-geo-alt"></i> Konum Haritası</small>
+                    <small class="text-muted">@Model.Location</small>
+                </div>
+                <div class="card-body p-0">
+                    <iframe width="100%" height="200" frameborder="0" scrolling="no" marginheight="0" marginwidth="0"
+                            src="https://maps.google.com/maps?q=@Uri.EscapeDataString(Model.Location)&t=&z=13&ie=UTF8&iwloc=&output=embed">
+                    </iframe>
+                </div>
+            </div>
         </div>
-    }
 
-    <dl class="row">
-        <dt class="col-sm-3">Etkinlik Adı</dt>
-        <dd class="col-sm-9">@Model.Title</dd>
+        <!-- Sağ Kolon: Detaylar ve Bilet Satın Alma -->
+        <div class="col-lg-7">
+            <div class="card bg-dark text-white border-secondary shadow-lg h-100">
+                <div class="card-body p-4 d-flex flex-column justify-content-between">
+                    <div>
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <span class="badge bg-info text-dark fs-6">@Model.Category?.Name</span>
+                            <span class="fs-4 text-success fw-bold">₺@Model.Price.ToString("N2")</span>
+                        </div>
 
-        <dt class="col-sm-3">Açıklama</dt>
-        <dd class="col-sm-9">@Model.Description</dd>
+                        <h2 class="card-title fw-bold mb-3">@Model.Title</h2>
+                        <p class="card-text text-light opacity-75 mb-4">@Model.Description</p>
 
-        <dt class="col-sm-3">Kategori</dt>
-        <dd class="col-sm-9">
-            <span class="badge bg-info text-dark">@Model.Category?.Name</span>
-        </dd>
+                        <hr class="border-secondary" />
 
-        <dt class="col-sm-3">Tarih</dt>
-        <dd class="col-sm-9">@Model.EventDate.ToString("dd.MM.yyyy HH:mm")</dd>
+                        <div class="row g-3 my-2">
+                            <div class="col-sm-6">
+                                <small class="text-muted d-block">Tarih & Saat</small>
+                                <strong>@Model.EventDate.ToString("dd.MM.yyyy HH:mm")</strong>
+                            </div>
+                            <div class="col-sm-6">
+                                <small class="text-muted d-block">Konum</small>
+                                <strong>@Model.Location</strong>
+                            </div>
+                            <div class="col-sm-6">
+                                <small class="text-muted d-block">Kalan Bilet / Durum</small>
+                                @if (Model.AvailableSeats > 0)
+                                {
+                                    <span class="badge bg-success">@Model.AvailableSeats / @Model.Capacity Bilet Mevcut</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-danger">Tükendi</span>
+                                }
+                            </div>
+                        </div>
+                    </div>
 
-        <dt class="col-sm-3">Konum</dt>
-        <dd class="col-sm-9">@Model.Location</dd>
+                    <!-- Aksiyon Butonları -->
+                    <div class="pt-4 border-top border-secondary mt-3">
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-start align-items-center">
+                            @if (Model.AvailableSeats > 0)
+                            {
+                                <a asp-controller="Tickets" asp-action="Buy" asp-route-id="@Model.Id" class="btn btn-success btn-lg px-4 me-md-2">
+                                    🎟 Bilet Satın Al
+                                </a>
+                            }
+                            else
+                            {
+                                <button class="btn btn-danger btn-lg px-4 me-md-2" disabled>Biletler Tükendi</button>
+                            }
 
-        <dt class="col-sm-3">Fiyat</dt>
-        <dd class="col-sm-9 text-success fw-bold">@Model.Price.ToString("C")</dd>
-    </dl>
+                            <!-- Takvime Ekle Butonu -->
+                            <a href="@googleCalendarUrl" target="_blank" class="btn btn-outline-info">
+                                📅 Google Takvim'e Ekle
+                            </a>
 
-    <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-warning">Düzenle</a>
-    <a asp-action="Index" class="btn btn-secondary">Geri Dön</a>
+                            <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-warning">Düzenle</a>
+                            <a asp-action="Index" class="btn btn-outline-light ms-auto">Listeye Dön</a>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Yorumlar ve Puanlama Bölümü -->
+    <div class="row mt-5">
+        <div class="col-12">
+            <div class="card bg-dark text-white border-secondary shadow">
+                <div class="card-header border-secondary d-flex justify-content-between align-items-center">
+                    <h4 class="mb-0">💬 Değerlendirmeler & Yorumlar (@(Model.Reviews?.Count ?? 0))</h4>
+                    <div>
+                        @{
+                            double avgRating = Model.Reviews != null && Model.Reviews.Any() ? Model.Reviews.Average(r => r.Rating) : 0;
+                        }
+                        <span class="text-warning fs-5 fw-bold">★ @avgRating.ToString("0.0")</span> / 5.0
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="row g-4">
+                        <!-- Yorum Yapma Formu -->
+                        <div class="col-md-5 border-end border-secondary">
+                            <h5 class="mb-3">Yorum Yap</h5>
+                            <form asp-action="AddReview" method="post">
+                                <input type="hidden" name="eventId" value="@Model.Id" />
+                                
+                                <div class="mb-3">
+                                    <label class="form-label">Adınız Soyadınız</label>
+                                    <input type="text" name="userName" class="form-control bg-dark text-white border-secondary" required placeholder="Adınız" />
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label">Puanınız</label>
+                                    <select name="rating" class="form-select bg-dark text-white border-secondary">
+                                        <option value="5">⭐⭐⭐⭐⭐ (5 - Mükemmel)</option>
+                                        <option value="4">⭐⭐⭐⭐ (4 - Çok İyi)</option>
+                                        <option value="3">⭐⭐⭐ (3 - Orta)</option>
+                                        <option value="2">⭐⭐ (2 - Kötü)</option>
+                                        <option value="1">⭐ (1 - Çok Kötü)</option>
+                                    </select>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label">Yorumunuz</label>
+                                    <textarea name="comment" rows="3" class="form-control bg-dark text-white border-secondary" required placeholder="Etkinlik hakkında ne düşünüyorsunuz?"></textarea>
+                                </div>
+
+                                <button type="submit" class="btn btn-primary w-100">Yorum Gönder</button>
+                            </form>
+                        </div>
+
+                        <!-- Yorum Listesi -->
+                        <div class="col-md-7">
+                            <h5 class="mb-3">Kullanıcı Yorumları</h5>
+                            @if (Model.Reviews != null && Model.Reviews.Any())
+                            {
+                                <div style="max-height: 350px; overflow-y: auto;">
+                                    @foreach (var review in Model.Reviews.OrderByDescending(r => r.CreatedDate))
+                                    {
+                                        <div class="p-3 mb-3 bg-secondary bg-opacity-10 rounded border border-secondary">
+                                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                                <strong>@review.UserName</strong>
+                                                <span class="text-warning">@string.Concat(Enumerable.Repeat("★", review.Rating))</span>
+                                            </div>
+                                            <p class="mb-1 text-light opacity-75">@review.Comment</p>
+                                            <small class="text-muted opacity-50">@review.CreatedDate.ToString("dd.MM.yyyy HH:mm")</small>
+                                        </div>
+                                    }
+                                </div>
+                            }
+                            else
+                            {
+                                <p class="text-muted">Henüz yorum yapılmamış. İlk yorumu sen yap!</p>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>

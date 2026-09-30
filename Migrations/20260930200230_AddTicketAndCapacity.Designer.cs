@@ -4,6 +4,7 @@ using EventTicketApp.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace EventTicketApp.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260930200230_AddTicketAndCapacity")]
+    partial class AddTicketAndCapacity
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -84,38 +87,6 @@ namespace EventTicketApp.Migrations
                     b.ToTable("Events");
                 });
 
-            modelBuilder.Entity("EventTicketApp.Models.Review", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Comment")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("EventId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("Rating")
-                        .HasColumnType("int");
-
-                    b.Property<string>("UserName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("EventId");
-
-                    b.ToTable("Review");
-                });
-
             modelBuilder.Entity("EventTicketApp.Models.Ticket", b =>
                 {
                     b.Property<int>("Id")
@@ -166,17 +137,6 @@ namespace EventTicketApp.Migrations
                     b.Navigation("Category");
                 });
 
-            modelBuilder.Entity("EventTicketApp.Models.Review", b =>
-                {
-                    b.HasOne("EventTicketApp.Models.Event", "Event")
-                        .WithMany("Reviews")
-                        .HasForeignKey("EventId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Event");
-                });
-
             modelBuilder.Entity("EventTicketApp.Models.Ticket", b =>
                 {
                     b.HasOne("EventTicketApp.Models.Event", "Event")
@@ -191,11 +151,6 @@ namespace EventTicketApp.Migrations
             modelBuilder.Entity("EventTicketApp.Models.Category", b =>
                 {
                     b.Navigation("Events");
-                });
-
-            modelBuilder.Entity("EventTicketApp.Models.Event", b =>
-                {
-                    b.Navigation("Reviews");
                 });
 #pragma warning restore 612, 618
         }

@@ -15,26 +15,49 @@ namespace EventTicketApp.Controllers
 
         public async Task<IActionResult> Index()
         {
-            // İstatistikler
+            // --- Kart İstatistikleri ---
             ViewBag.TotalEvents = await _context.Events.CountAsync();
             ViewBag.TotalCategories = await _context.Categories.CountAsync();
+            ViewBag.UpcomingEvents = await _context.Events.CountAsync(e => e.EventDate >= DateTime.Now);
+            ViewBag.AveragePrice = await _context.Events.AnyAsync() ? await _context.Events.AverageAsync(e => e.Price) : 0;
 
-            ViewBag.UpcomingEvents = await _context.Events
-                .Where(e => e.EventDate > DateTime.Now)
-                .CountAsync();
+            // --- Chart 1: Kategoriye Göre Etkinlik Dağılımı (Doughnut Chart) ---
+            var categoryData = await _context.Categories
+                .Select(c => new
+                {
+                    CategoryName = c.Name,
+                    EventCount = c.Events.Count()
+                }).ToListAsync();
 
-            ViewBag.AveragePrice = await _context.Events.AnyAsync()
-                ? await _context.Events.AverageAsync(e => e.Price)
-                : 0;
+            ViewBag.CategoryLabels = categoryData.Select(c => c.CategoryName).ToArray();
+            ViewBag.CategoryCounts = categoryData.Select(c => c.EventCount).ToArray();
 
-            // Son 5 etkinlik
-            var recentEvents = await _context.Events
+            // --- Chart 2: Satılan Bilet Sayılarına Göre Top Etkinlikler (Bar Chart) ---
+            var ticketData = await _context.Events
+                .OrderByDescending(e => e.SoldTicketsCount)
+                .Take(5)
+                .Select(e => new
+                {
+                    EventTitle = e.Title,
+                    Solds = e.SoldTicketsCount
+                }).ToListAsync();
+
+            ViewBag.EventLabels = ticketData.Select(t => t.EventTitle).ToArray();
+            ViewBag.EventSolds = ticketData.Select(t => t.Solds).ToArray();
+
+            // Son eklenen 3 etkinlik
+            var latestEvents = await _context.Events
                 .Include(e => e.Category)
                 .OrderByDescending(e => e.Id)
-                .Take(5)
+                .Take(3)
                 .ToListAsync();
 
-            return View(recentEvents);
+            return View(latestEvents);
+        }
+
+        public IActionResult Privacy()
+        {
+            return View();
         }
     }
 }

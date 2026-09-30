@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using X.PagedList;
-using X.PagedList.EF;  // Yeni eklenen satır                   // ⬅️ BU SATIR EKLENECEK
+using X.PagedList.EF;
 using EventTicketApp.Data;
 using EventTicketApp.Models;
 
@@ -18,18 +18,18 @@ namespace EventTicketApp.Controllers
         }
 
         // GET: Events
-     public async Task<IActionResult> Index(int? page)
-{
-    int pageSize = 6;
-    int pageNumber = page ?? 1;
+        public async Task<IActionResult> Index(int? page)
+        {
+            int pageSize = 6;
+            int pageNumber = page ?? 1;
 
-    var events = await _context.Events
-        .Include(e => e.Category)
-        .OrderBy(e => e.EventDate)
-        .ToPagedListAsync(pageNumber, pageSize);
+            var events = await _context.Events
+                .Include(e => e.Category)
+                .OrderBy(e => e.EventDate)
+                .ToPagedListAsync(pageNumber, pageSize);
 
-    return View(events);
-}
+            return View(events);
+        }
 
         // GET: Events/Details/5
         public async Task<IActionResult> Details(int? id)
@@ -39,9 +39,12 @@ namespace EventTicketApp.Controllers
                 return NotFound();
             }
 
+            // myEvent değişken ismi tek tip hale getirildi
             var myEvent = await _context.Events
                 .Include(e => e.Category)
+                .Include(e => e.Reviews)
                 .FirstOrDefaultAsync(m => m.Id == id);
+
             if (myEvent == null)
             {
                 return NotFound();
@@ -64,7 +67,6 @@ namespace EventTicketApp.Controllers
         {
             if (ModelState.IsValid)
             {
-                // Resim yükleme
                 if (imageFile != null && imageFile.Length > 0)
                 {
                     myEvent.ImagePath = await SaveImageAsync(imageFile);
@@ -112,14 +114,12 @@ namespace EventTicketApp.Controllers
             {
                 try
                 {
-                    // Yeni resim yüklenmişse eskiyi değiştir
                     if (imageFile != null && imageFile.Length > 0)
                     {
                         myEvent.ImagePath = await SaveImageAsync(imageFile);
                     }
                     else
                     {
-                        // Resim yüklenmediyse mevcut ImagePath'i koru
                         var existing = await _context.Events.AsNoTracking()
                             .FirstOrDefaultAsync(e => e.Id == id);
                         if (existing != null)
@@ -161,6 +161,7 @@ namespace EventTicketApp.Controllers
             var myEvent = await _context.Events
                 .Include(e => e.Category)
                 .FirstOrDefaultAsync(m => m.Id == id);
+
             if (myEvent == null)
             {
                 return NotFound();
@@ -184,35 +185,52 @@ namespace EventTicketApp.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        // ============================================================
-        // YARDIMCI METOT: Resmi wwwroot/images/events klasörüne kaydeder
-        // ve veritabanına kaydedilecek göreli yolu döner
-        // ============================================================
+        // POST: Events/AddReview
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> AddReview(int eventId, string userName, string comment, int rating)
+        {
+            if (string.IsNullOrWhiteSpace(userName) || string.IsNullOrWhiteSpace(comment))
+            {
+                TempData["Error"] = "Lütfen tüm alanları doldurun.";
+                return RedirectToAction(nameof(Details), new { id = eventId });
+            }
+
+            var review = new Review
+            {
+                EventId = eventId,
+                UserName = userName,
+                Comment = comment,
+                Rating = Math.Clamp(rating, 1, 5),
+                CreatedDate = DateTime.Now
+            };
+
+            _context.Reviews.Add(review);
+            await _context.SaveChangesAsync();
+
+            TempData["Success"] = "Yorumunuz başarıyla eklendi!";
+            return RedirectToAction(nameof(Details), new { id = eventId });
+        }
+
+        // YARDIMCI METOT: Resim Kaydetme
         private async Task<string> SaveImageAsync(IFormFile imageFile)
         {
-            // Benzersiz dosya adı: GUID + orijinal uzantı
             var extension = Path.GetExtension(imageFile.FileName).ToLowerInvariant();
             var fileName = $"{Guid.NewGuid()}{extension}";
-
-            // Klasör yolu
             var folderPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "images", "events");
 
-            // Klasör yoksa oluştur
             if (!Directory.Exists(folderPath))
             {
                 Directory.CreateDirectory(folderPath);
             }
 
-            // Tam dosya yolu
             var fullPath = Path.Combine(folderPath, fileName);
 
-            // Dosyayı diske yaz
             using (var stream = new FileStream(fullPath, FileMode.Create))
             {
                 await imageFile.CopyToAsync(stream);
             }
 
-            // Veritabanına kaydedilecek göreli yol
             return $"/images/events/{fileName}";
         }
     }

@@ -11,5 +11,7 @@ namespace EventTicketApp.Data
 
         public DbSet<Category> Categories { get; set; }
         public DbSet<Event> Events { get; set; }
+        public DbSet<Ticket> Tickets { get; set; }
+        public List<Review> Reviews { get; set; } = new List<Review>();
     }
 }

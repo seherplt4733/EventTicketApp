@@ -1,0 +1,29 @@
+@model EventTicketApp.Models.Ticket
+
+@{
+    ViewData["Title"] = "Bilet Onayı";
+}
+
+<div class="container my-5 text-center">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card bg-dark text-white border-success shadow-lg">
+                <div class="card-body p-4">
+                    <div class="display-1 text-success mb-3">✓</div>
+                    <h2 class="text-success">Biletiniz Başarıyla Oluşturuldu!</h2>
+                    <p class="lead">Satın alma işleminiz gerçekleşmiştir.</p>
+
+                    <div class="p-3 my-3 bg-secondary bg-opacity-25 rounded border border-secondary text-start">
+                        <p class="mb-1"><strong>Bilet Kodu:</strong> <span class="badge bg-primary fs-6">@Model.TicketCode</span></p>
+                        <p class="mb-1"><strong>Etkinlik:</strong> @Model.Event?.Title</p>
+                        <p class="mb-1"><strong>Ad Soyad:</strong> @Model.CustomerName</p>
+                        <p class="mb-1"><strong>Adet:</strong> @Model.Quantity</p>
+                        <p class="mb-0"><strong>Toplam Tutar:</strong> ₺@Model.TotalPrice.ToString("N2")</p>
+                    </div>
+
+                    <a asp-controller="Events" asp-action="Index" class="btn btn-primary">Etkinliklere Dön</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

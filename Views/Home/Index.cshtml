@@ -2,113 +2,156 @@
 
 @{
     ViewData["Title"] = "Ana Sayfa";
-    var avgPrice = (decimal)ViewBag.AveragePrice;
 }
 
-<!-- Hero Bölümü -->
-<div class="bg-primary text-white text-center py-5 mb-4 rounded shadow-sm">
-    <h1 class="display-4 fw-bold">🎫 EventTicketApp</h1>
-    <p class="lead">Türkiye'nin en kapsamlı etkinlik biletleme platformu</p>
-    <a asp-controller="Events" asp-action="Index" class="btn btn-light btn-lg mt-2">
-        Etkinlikleri Keşfet →
+<!-- Hero Banner -->
+<div class="p-5 mb-4 bg-primary text-white rounded-3 shadow text-center">
+    <h1 class="display-5 fw-bold">🎫 EventTicketApp</h1>
+    <p class="fs-4">Türkiye'nin en kapsamlı etkinlik biletleme platformu</p>
+    <a asp-controller="Events" asp-action="Index" class="btn btn-light btn-lg px-4 fw-bold">Etkinlikleri Keşfet →</a>
+</div>
+
+<div class="d-flex justify-content-end mb-3">
+    <a asp-controller="Tickets" asp-action="ExportToCsv" class="btn btn-outline-success">
+        📥 Bilet Satış Raporunu İndir (Excel / CSV)
     </a>
 </div>
 
 <!-- İstatistik Kartları -->
-<div class="row g-4 mb-5">
-    <div class="col-md-3 col-sm-6">
-        <div class="card border-0 shadow-sm h-100 text-center">
-            <div class="card-body">
-                <div style="font-size: 3rem;">📅</div>
-                <h2 class="display-6 fw-bold text-primary mb-0">@ViewBag.TotalEvents</h2>
-                <p class="text-muted mb-0">Toplam Etkinlik</p>
+<div class="row text-center my-4 g-3">
+    <div class="col-md-3">
+        <div class="card bg-dark text-white border-secondary p-3 shadow-sm">
+            <h3 class="text-primary fw-bold">@ViewBag.TotalEvents</h3>
+            <small class="text-muted">Toplam Etkinlik</small>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-dark text-white border-secondary p-3 shadow-sm">
+            <h3 class="text-success fw-bold">@ViewBag.TotalCategories</h3>
+            <small class="text-muted">Kategori</small>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-dark text-white border-secondary p-3 shadow-sm">
+            <h3 class="text-warning fw-bold">@ViewBag.UpcomingEvents</h3>
+            <small class="text-muted">Yaklaşan Etkinlik</small>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-dark text-white border-secondary p-3 shadow-sm">
+            <h3 class="text-danger fw-bold">₺@string.Format("{0:N2}", ViewBag.AveragePrice)</h3>
+            <small class="text-muted">Ortalama Fiyat</small>
+        </div>
+    </div>
+</div>
+
+<!-- GRAFİK BÖLÜMÜ (Chart.js) -->
+<div class="row my-5 g-4">
+    <div class="col-md-6">
+        <div class="card bg-dark text-white border-secondary p-3 shadow">
+            <h5 class="card-title text-center mb-3">📊 Kategoriye Göre Etkinlikler</h5>
+            <div style="max-height: 280px;" class="d-flex justify-content-center">
+                <canvas id="categoryChart"></canvas>
             </div>
         </div>
     </div>
-
-    <div class="col-md-3 col-sm-6">
-        <div class="card border-0 shadow-sm h-100 text-center">
-            <div class="card-body">
-                <div style="font-size: 3rem;">📂</div>
-                <h2 class="display-6 fw-bold text-success mb-0">@ViewBag.TotalCategories</h2>
-                <p class="text-muted mb-0">Kategori</p>
-            </div>
-        </div>
-    </div>
-
-    <div class="col-md-3 col-sm-6">
-        <div class="card border-0 shadow-sm h-100 text-center">
-            <div class="card-body">
-                <div style="font-size: 3rem;">⏰</div>
-                <h2 class="display-6 fw-bold text-warning mb-0">@ViewBag.UpcomingEvents</h2>
-                <p class="text-muted mb-0">Yaklaşan Etkinlik</p>
-            </div>
-        </div>
-    </div>
-
-    <div class="col-md-3 col-sm-6">
-        <div class="card border-0 shadow-sm h-100 text-center">
-            <div class="card-body">
-                <div style="font-size: 3rem;">💰</div>
-                <h2 class="display-6 fw-bold text-danger mb-0">@avgPrice.ToString("C")</h2>
-                <p class="text-muted mb-0">Ortalama Fiyat</p>
+    <div class="col-md-6">
+        <div class="card bg-dark text-white border-secondary p-3 shadow">
+            <h5 class="card-title text-center mb-3">🔥 En Çok Bilet Satılan Etkinlikler</h5>
+            <div style="max-height: 280px;">
+                <canvas id="ticketsChart"></canvas>
             </div>
         </div>
     </div>
 </div>
 
 <!-- Son Eklenen Etkinlikler -->
-<div class="card border-0 shadow-sm">
-    <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+<div class="card bg-dark text-white border-secondary shadow mb-4">
+    <div class="card-header border-secondary d-flex justify-content-between align-items-center">
         <h5 class="mb-0">🆕 Son Eklenen Etkinlikler</h5>
-        <a asp-controller="Events" asp-action="Index" class="btn btn-sm btn-outline-light">
-            Tümünü Gör
-        </a>
+        <a asp-controller="Events" asp-action="Index" class="btn btn-sm btn-outline-light">Tümünü Gör</a>
     </div>
     <div class="card-body p-0">
-        @if (!Model.Any())
-        {
-            <div class="text-center text-muted py-5">
-                <p>Henüz etkinlik eklenmedi.</p>
-                <a asp-controller="Events" asp-action="Create" class="btn btn-primary">
-                    İlk Etkinliği Ekle
-                </a>
-            </div>
-        }
-        else
-        {
-            <table class="table table-hover mb-0">
-                <thead class="table-light">
+        <table class="table table-dark table-hover mb-0">
+            <thead>
+                <tr>
+                    <th>Başlık</th>
+                    <th>Kategori</th>
+                    <th>Tarih</th>
+                    <th>Konum</th>
+                    <th>Fiyat</th>
+                    <th>İşlem</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
                     <tr>
-                        <th>Başlık</th>
-                        <th>Kategori</th>
-                        <th>Tarih</th>
-                        <th>Konum</th>
-                        <th class="text-end">Fiyat</th>
-                        <th class="text-center">İşlem</th>
+                        <td>@item.Title</td>
+                        <td><span class="badge bg-info text-dark">@item.Category?.Name</span></td>
+                        <td>@item.EventDate.ToString("dd.MM.yyyy HH:mm")</td>
+                        <td>@item.Location</td>
+                        <td class="text-success fw-bold">₺@item.Price.ToString("N2")</td>
+                        <td>
+                            <a asp-controller="Events" asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-primary">Detay</a>
+                        </td>
                     </tr>
-                </thead>
-                <tbody>
-                    @foreach (var item in Model)
-                    {
-                        <tr>
-                            <td class="fw-semibold">@item.Title</td>
-                            <td>
-                                <span class="badge bg-info text-dark">@item.Category?.Name</span>
-                            </td>
-                            <td>@item.EventDate.ToString("dd.MM.yyyy HH:mm")</td>
-                            <td>@item.Location</td>
-                            <td class="text-end text-success fw-bold">@item.Price.ToString("C")</td>
-                            <td class="text-center">
-                                <a asp-controller="Events" asp-action="Details" asp-route-id="@item.Id"
-                                   class="btn btn-sm btn-outline-primary">
-                                    Detay
-                                </a>
-                            </td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
-        }
+                }
+            </tbody>
+        </table>
     </div>
 </div>
+
+<!-- Chart.js CDN ve Scriptler -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // C# tarafındaki dizileri JS array formatına dönüştürüyoruz
+    const categoryLabels = @Html.Raw(Json.Serialize(ViewBag.CategoryLabels));
+    const categoryCounts = @Html.Raw(Json.Serialize(ViewBag.CategoryCounts));
+
+    const eventLabels = @Html.Raw(Json.Serialize(ViewBag.EventLabels));
+    const eventSolds = @Html.Raw(Json.Serialize(ViewBag.EventSolds));
+
+    // 1. Grafik: Kategori Dağılımı (Doughnut Chart)
+    const ctx1 = document.getElementById('categoryChart').getContext('2d');
+    new Chart(ctx1, {
+        type: 'doughnut',
+        data: {
+            labels: categoryLabels,
+            datasets: [{
+                data: categoryCounts,
+                backgroundColor: ['#0d6efd', '#198754', '#ffc107', '#dc3545', '#0dcaf0', '#6c757d']
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: { labels: { color: '#ffffff' } }
+            }
+        }
+    });
+
+    // 2. Grafik: En Çok Satılan Biletler (Bar Chart)
+    const ctx2 = document.getElementById('ticketsChart').getContext('2d');
+    new Chart(ctx2, {
+        type: 'bar',
+        data: {
+            labels: eventLabels,
+            datasets: [{
+                label: 'Satılan Bilet',
+                data: eventSolds,
+                backgroundColor: '#198754'
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                x: { ticks: { color: '#ffffff' } },
+                y: { ticks: { color: '#ffffff' }, beginAtZero: true }
+            },
+            plugins: {
+                legend: { labels: { color: '#ffffff' } }
+            }
+        }
+    });
+</script>

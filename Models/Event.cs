@@ -24,19 +24,25 @@ namespace EventTicketApp.Models
         [Display(Name = "Bilet Fiyatı")]
         public decimal Price { get; set; }
 
-        // --- YENİ EKLENEN KONTENJAN ALANLARI ---
+        [Display(Name = "Afiş / Resim")]
+        public string? ImagePath { get; set; }
+
+        // --- KONTENJAN VE BİLET YÖNETİMİ ---
         [Display(Name = "Toplam Kontenjan")]
+        [Range(1, 10000, ErrorMessage = "Kontenjan en az 1 olmalıdır.")]
         public int Capacity { get; set; } = 100;
 
+        [Display(Name = "Satılan Bilet Sayısı")]
+        public int SoldTicketsCount { get; set; } = 0;
+
+        // Kalan bilet sayısını hesaplayan property
         [Display(Name = "Kalan Bilet")]
-        public int AvailableSeats { get; set; } = 100;
+        public int AvailableSeats => Capacity - SoldTicketsCount;
 
         // Yabancı Anahtar (Foreign Key)
         [Display(Name = "Kategori")]
         public int CategoryId { get; set; }
         public Category? Category { get; set; }
-
-        [Display(Name = "Afiş / Resim")]
-        public string? ImagePath { get; set; }
+        public List<Review> Reviews { get; set; } = new List<Review>();
     }
 }
